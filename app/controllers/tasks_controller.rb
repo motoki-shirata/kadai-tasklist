@@ -1,10 +1,12 @@
 class TasksController < ApplicationController
+	before_action :set_message, only:[:show, :edit, :update, :destroy]
+	
 	def index
 		@tasks = Task.all
 	end
 
 	def show
-		@task = Task.find(params[:id])
+		# @task = Task.find(params[:id])
 	end
 
 	def new
@@ -27,11 +29,11 @@ class TasksController < ApplicationController
 	end
 
 	def edit
-		@task = Task.find(params[:id])
+		# @task = Task.find(params[:id])
 	end
 
 	def update
-		@task = Task.find(params[:id])
+		# @task = Task.find(params[:id])
 		
 		if @task.update(task_params)
 			flash[:success] = 'Taskは正常に更新されました'
@@ -43,7 +45,7 @@ class TasksController < ApplicationController
 	end
 
 	def destroy
-		@task = Task.find(params[:id])
+		# @task = Task.find(params[:id])
 		@task.destroy
 		
 		flash[:success] = 'Taskは正常に削除されました'
@@ -51,9 +53,15 @@ class TasksController < ApplicationController
 		# redirect_to だから最後に_urlつける
 	end
 	
+	private
+	
+  def set_message
+    @task = Task.find(params[:id])
+  end
+	
   def task_params
-  	# Taskモデルのフォームから得られるデータのうち、:content飲みを許容
-    params.require(:task).permit(:content)
+  	# Taskモデルのフォームから得られるデータのうち、:contentのみを許容
+    params.require(:task).permit(:content, :status)
   end
 	
 end
