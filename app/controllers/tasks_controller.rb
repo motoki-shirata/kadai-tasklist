@@ -1,8 +1,14 @@
 class TasksController < ApplicationController
 	before_action :set_message, only:[:show, :edit, :update, :destroy]
-	
+  before_action :require_user_logged_in
+  before_action :correct_user, only: [:destroy, :edit, :show, :update]
+
+
 	def index
-		@tasks = Task.all
+    if logged_in?
+      @task = current_user.tasks.build  # form_with 用
+      @tasks = current_user.tasks.order(id: :desc).page(params[:page])
+    end
 	end
 
 	def show
@@ -13,19 +19,17 @@ class TasksController < ApplicationController
 		@task = Task.new
 	end
 
-  
+
 	def create
-		# 上で定義したtask_paramsを引数として新たにインスタンスを作成
-		@task = Task.new(task_params)
-		if @task.save
-			#データベースに保存できたら
-			flash[:success] = 'Taskが正常に登録されました'
-			redirect_to @task
-			#showアクションを実行、show.html.erbを表示
-		else
-			flash.now[:danger] = 'Taskが正常に登録されませんでした'
-			render action: :new #newアクションを行わずにnew.html.erbを表示
-		end
+    @task = current_user.tasks.build(task_params)
+    if @task.save
+      flash[:success] = 'タスクを登録しました。'
+      redirect_to '/'
+    else
+      @tasks = current_user.tasks.order(id: :desc).page(params[:page])
+      flash.now[:danger] = 'タスクの登録に失敗しました。'
+      render 'tasks/new'
+    end
 	end
 
 	def edit
@@ -34,7 +38,7 @@ class TasksController < ApplicationController
 
 	def update
 		# @task = Task.find(params[:id])
-		
+
 		if @task.update(task_params)
 			flash[:success] = 'Taskは正常に更新されました'
 			redirect_to @task
@@ -47,21 +51,27 @@ class TasksController < ApplicationController
 	def destroy
 		# @task = Task.find(params[:id])
 		@task.destroy
-		
+
 		flash[:success] = 'Taskは正常に削除されました'
 		redirect_to tasks_url
 		# redirect_to だから最後に_urlつける
 	end
-	
+
 	private
-	
+
   def set_message
     @task = Task.find(params[:id])
   end
-	
+
   def task_params
   	# Taskモデルのフォームから得られるデータのうち、:contentのみを許容
     params.require(:task).permit(:content, :status)
   end
-	
+
+  def correct_user
+    @task = current_user.tasks.find_by(id: params[:id])
+    unless @task
+      redirect_to '/'
+    end
+  end
 end
