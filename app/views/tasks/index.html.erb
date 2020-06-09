@@ -5,7 +5,7 @@
     <% @tasks.each do |task| %>
         <li><%= link_to task.id, task %> :  <%= task.status %> <%= task.content %></li>
     <% end %>
-    <%= link_to '新規タス クの登録', new_task_path %>
+    <%= link_to '新規タスクの登録', new_task_path %>
   <% else %>
     <%= link_to 'Signup', signup_path, class: 'nav-link' %></li>
     <%= link_to 'Login', login_path, class: 'nav-link' %></li>
